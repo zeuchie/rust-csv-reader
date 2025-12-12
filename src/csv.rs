@@ -1,4 +1,7 @@
+use std::collections::HashSet;
+
 #[allow(unused)]
+#[derive(Debug, Clone)]
 
 struct Track {
     track_id: String,
@@ -82,7 +85,7 @@ fn split_row(s: &str) -> Vec<&str> {
 
     while s != "" {
         // While string is not empty
-        println!("{s}");
+        // println!("{s}"); // Debug print to see the current state of s
         if s.starts_with('"') {
             // String start has been found
             s = &s[1..]; // Skip the opening quote
@@ -156,4 +159,79 @@ fn test_split_row() {
         "2.4",
     ];
     assert_eq!(split_row(input), expected);
+}
+
+impl CSV {
+    pub fn print_tracks_by_artist_name(&self, name: String) {
+        if self.rows.iter().any(|track| track.artist_name == name) {
+            println!("Tracks by artist \"{}\":", name);
+            for track in self.rows.iter() {
+                if track.artist_name == name {
+                    println!("{:?}", track.track_name);
+                }
+            }
+        } else {
+            println!("No tracks found for artist \"{}\"", name);
+        }
+    }
+
+    pub fn print_top_artists_by_followers(&self, n: usize) {
+        let mut artist_seen: HashSet<String> = HashSet::new();
+
+        let mut rows: Vec<Track> = self.rows.clone();
+        rows.sort_by(|a, b| b.artist_followers.cmp(&a.artist_followers));
+
+        println!("Top {} artists by follower count:", n);
+        for track in rows
+            .iter()
+            .filter(|t| artist_seen.insert(t.artist_name.clone()))
+            .take(n)
+        {
+            println!(
+                "{}: {} followers",
+                track.artist_name, track.artist_followers
+            );
+        }
+    }
+
+    pub fn print_n_tracks_with_duration_atleast_and_explicit(
+        &self,
+        n_tracks: i32,
+        duration: f32,
+        is_explicit: bool,
+    ) {
+        let mut result_tracks: Vec<(&str, &str)> = Vec::new();
+        let explicit_string: &str = if is_explicit {
+            "explicit"
+        } else {
+            "not explicit"
+        };
+        let mut count = 0;
+
+        for track in self
+            .rows
+            .iter()
+            .filter(|track| track.track_duration_min >= duration && track.explicit == is_explicit)
+        {
+            count += 1;
+            if count == n_tracks {
+                break;
+            };
+            result_tracks.push((&track.track_name, &track.artist_name));
+        }
+        if count > 0 {
+            println!(
+                "First {count} tracks found with a duration of at least {} minutes and is {}:",
+                duration, explicit_string
+            );
+            for element in result_tracks {
+                println!("\"{}\" by {}", element.0, element.1);
+            }
+        } else {
+            println!(
+                "No tracks found with a duration of at least {} minutes and is {}:",
+                duration, explicit_string
+            );
+        }
+    }
 }

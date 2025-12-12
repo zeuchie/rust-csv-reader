@@ -28,5 +28,16 @@ fn main() {
     spotify_data.read_to_string(&mut csv_string).unwrap();
 
     // Parse the csv string into a CSV struct which holds a vector of tracks (rows)
-    let _spotify_csv: csv::CSV = csv::parse_csv(&csv_string);
+    let spotify_csv: csv::CSV = csv::parse_csv(&csv_string);
+
+    // Call method to print tracks by artist_name
+    spotify_csv.print_tracks_by_artist_name("Tame Impala".to_string());
+    println!();
+
+    // Call method to print top 10 artists by follower count
+    spotify_csv.print_top_artists_by_followers(10);
+    println!();
+    
+    // Call method to print 10 number of tracks with duration at least 2.5 minutes and explicit
+    spotify_csv.print_n_tracks_with_duration_atleast_and_explicit(20, 2.5, true);
 }
